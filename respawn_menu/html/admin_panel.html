@@ -1,0 +1,86 @@
+<!-- ══════════════════════════════════════════════════════════════════
+     respawn_menu / html / admin_panel.html  (injected into index.html via JS)
+     This is rendered INSIDE the same NUI page via JS DOM manipulation.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<!-- ADMIN PANEL OVERLAY (injected into body by script.js) -->
+<div id="admin-panel-overlay" class="ap-hidden">
+
+    <div id="admin-panel">
+        <!-- HEADER -->
+        <div class="ap-header">
+            <div class="ap-header-left">
+                <span class="ap-icon">⚙</span>
+                <div>
+                    <h2 class="ap-title">PANEL DE ADMINISTRACIÓN</h2>
+                    <p class="ap-subtitle">Permisos de Respawn Táctico — <kbd>F6</kbd> para cerrar</p>
+                </div>
+            </div>
+            <button class="ap-close-btn" id="ap-btn-close" title="Cerrar">✕</button>
+        </div>
+
+        <!-- TABS -->
+        <div class="ap-tabs">
+            <button class="ap-tab active" data-tab="online">
+                🟢 Jugadores Online
+                <span class="ap-badge" id="ap-badge-online">0</span>
+            </button>
+            <button class="ap-tab" data-tab="persisted">
+                📋 Permisos Guardados
+                <span class="ap-badge" id="ap-badge-persisted">0</span>
+            </button>
+            <button class="ap-tab" data-tab="add-manual">
+                ➕ Agregar Manual
+            </button>
+        </div>
+
+        <!-- TAB: ONLINE PLAYERS -->
+        <div class="ap-tab-content active" id="ap-tab-online">
+            <div class="ap-search-row">
+                <input type="text" id="ap-search-online" class="ap-input" placeholder="🔍  Buscar jugador...">
+            </div>
+            <div class="ap-list" id="ap-online-list">
+                <!-- populated by JS -->
+            </div>
+        </div>
+
+        <!-- TAB: PERSISTED PERMS -->
+        <div class="ap-tab-content" id="ap-tab-persisted">
+            <div class="ap-search-row">
+                <input type="text" id="ap-search-persisted" class="ap-input" placeholder="🔍  Buscar identifier o nombre...">
+            </div>
+            <div class="ap-list" id="ap-persisted-list">
+                <!-- populated by JS -->
+            </div>
+            <p class="ap-empty-note" id="ap-persisted-empty">Sin permisos guardados.</p>
+        </div>
+
+        <!-- TAB: MANUAL ADD -->
+        <div class="ap-tab-content" id="ap-tab-add-manual">
+            <div class="ap-manual-form">
+                <label class="ap-label">Identifier del jugador</label>
+                <input type="text" id="ap-manual-id" class="ap-input ap-input-large"
+                    placeholder="fivem:1234567  /  license:abc...  /  discord:123...">
+
+                <label class="ap-label" style="margin-top:14px;">Nombre (referencia)</label>
+                <input type="text" id="ap-manual-name" class="ap-input ap-input-large"
+                    placeholder="Nombre del jugador (opcional)">
+
+                <button class="ap-btn-grant full-width" id="ap-btn-manual-add">
+                    ➕ AGREGAR PERMISO
+                </button>
+
+                <div class="ap-manual-info">
+                    <p>💡 Usa este formulario para agregar jugadores que <strong>no estén conectados</strong> actualmente.</p>
+                    <p>Puedes encontrar el identifier en los logs del servidor o pedírselo al jugador.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="ap-footer">
+            <span class="ap-footer-note">Los permisos se guardan en <code>data/respawn_perms.json</code> y persisten entre reinicios.</span>
+        </div>
+    </div>
+
+</div>

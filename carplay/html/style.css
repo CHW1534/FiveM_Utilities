@@ -1,0 +1,1031 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+:root {
+    --apple-bg: rgba(22, 25, 32, 0.85);
+    --apple-card-bg: rgba(255, 255, 255, 0.08);
+    --apple-card-border: rgba(255, 255, 255, 0.18);
+    --apple-accent: #fa2d48;
+    --apple-accent-glow: rgba(250, 45, 72, 0.45);
+    --apple-text: #ffffff;
+    --apple-subtext: rgba(255, 255, 255, 0.68);
+    --apple-dock-bg: rgba(12, 14, 18, 0.85);
+    --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    font-family: var(--font-family);
+    color: var(--apple-text);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   MINI-REPRODUCTOR / HUD WIDGET (Top-Left + Smooth Entrance Animation)
+   ========================================================================== */
+
+.hud-widget {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    width: 360px;
+    padding: 12px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(26, 29, 38, 0.86) 0%, rgba(14, 16, 22, 0.92) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 999;
+    opacity: 1;
+    transform-origin: top left;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.hud-widget.hidden {
+    display: flex !important;
+    opacity: 0 !important;
+    transform: translateY(-25px) scale(0.85) !important;
+    pointer-events: none !important;
+}
+
+.hud-cover {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #2b2e38, #14161d);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hud-note {
+    font-size: 22px;
+    color: var(--apple-subtext);
+}
+
+.hud-details {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.hud-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.hud-title {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+}
+
+.hud-subtitle {
+    font-size: 11px;
+    color: var(--apple-subtext);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hud-progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.hud-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--apple-accent);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.equalizer-bars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 12px;
+}
+
+.equalizer-bars span {
+    width: 3px;
+    height: 100%;
+    background: var(--apple-accent);
+    border-radius: 2px;
+    transition: height 0.15s ease;
+}
+
+.equalizer-bars.paused span {
+    height: 3px !important;
+    opacity: 0.5;
+}
+
+.hud-keybind {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 6px 9px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: var(--apple-text);
+}
+
+.hud-keybind:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.key-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffffff;
+    background: var(--apple-accent);
+    padding: 1px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.key-label {
+    font-size: 8px;
+    color: var(--apple-subtext);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   FLOATING CARPLAY POPUP WINDOW (Apple iOS Opening & Closing Animation)
+   ========================================================================== */
+
+#app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 30px;
+    background: transparent !important;
+    background-color: transparent !important;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+#app.hidden {
+    display: flex !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.carplay-frame {
+    pointer-events: auto;
+    position: relative;
+    width: 760px;
+    height: 450px;
+    border-radius: 26px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(25, 28, 38, 0.88) 0%, rgba(12, 14, 18, 0.94) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.38);
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.65), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.35),
+                0 0 35px rgba(250, 45, 72, 0.15);
+    display: flex;
+    opacity: 1;
+    transform-origin: top left;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+#app.hidden .carplay-frame {
+    opacity: 0 !important;
+    transform: translateY(-30px) scale(0.88) !important;
+}
+
+.ambient-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.25;
+    transition: background-image 0.8s ease;
+    z-index: 0;
+}
+
+.glass-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(10, 12, 16, 0.6) 100%);
+    z-index: 1;
+}
+
+.carplay-dock {
+    position: relative;
+    z-index: 2;
+    width: 64px;
+    height: 100%;
+    background: var(--apple-dock-bg);
+    border-right: 1px solid rgba(255, 255, 255, 0.14);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(0);
+    opacity: 1;
+}
+
+#app.hidden .carplay-dock {
+    transform: translateX(-20px);
+    opacity: 0;
+}
+
+.dock-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.dock-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--apple-subtext);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.dock-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.dock-item.active {
+    background: var(--apple-accent);
+    color: #ffffff;
+    box-shadow: 0 4px 14px var(--apple-accent-glow);
+}
+
+.home-btn {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+.dock-divider {
+    width: 24px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 1px 0;
+}
+
+.dock-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.dock-clock {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+}
+
+.dock-status {
+    color: var(--apple-subtext);
+    opacity: 0.7;
+}
+
+.carplay-content {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px;
+    overflow: hidden;
+}
+
+.carplay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#app.hidden .carplay-header {
+    transform: translateY(-15px);
+    opacity: 0;
+}
+
+.brand-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--apple-accent);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.apple-logo {
+    font-size: 13px;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 1px;
+    color: #ffffff;
+}
+
+.close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.08);
+}
+
+.close-btn:active {
+    transform: scale(0.92);
+}
+
+.dashboard-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 14px;
+    min-height: 0;
+}
+
+.card {
+    background: var(--apple-card-bg);
+    border-radius: 18px;
+    border: 1px solid var(--apple-card-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: transform 0.45s cubic-bezier(0.34, 1.25, 0.64, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+#app.hidden .card {
+    transform: translateY(20px) scale(0.94);
+    opacity: 0;
+}
+
+.player-card {
+    justify-content: space-between;
+}
+
+.cover-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.cover-art {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #232733, #0d0f14);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.cover-fallback {
+    font-size: 40px;
+    color: var(--apple-subtext);
+}
+
+.player-info {
+    text-align: center;
+    margin-bottom: 6px;
+    overflow: hidden;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.track-title {
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+}
+
+.track-subtitle {
+    font-size: 11px;
+    color: var(--apple-subtext);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scrubber-container {
+    margin-bottom: 8px;
+}
+
+.time-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--apple-subtext);
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.ios-range {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.ios-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 6px;
+}
+
+.btn-control, .btn-secondary {
+    background: transparent;
+    border: 0;
+    color: var(--apple-subtext);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 8px;
+}
+
+.btn-control:hover, .btn-secondary:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary.active {
+    color: var(--apple-accent);
+    background: rgba(250, 45, 72, 0.15);
+}
+
+.btn-play {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--apple-accent);
+    color: #ffffff;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(250, 45, 72, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: background 0.2s;
+}
+
+.btn-play:hover {
+    background: #ff3b56;
+}
+
+.volume-slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-mute {
+    background: transparent;
+    border: 0;
+    color: var(--apple-subtext);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-mute:hover {
+    color: #ffffff;
+}
+
+.vol-range {
+    flex: 1;
+}
+
+.queue-card {
+    gap: 12px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.input-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--apple-subtext);
+    margin-bottom: 5px;
+    display: block;
+}
+
+.input-group {
+    display: flex;
+    gap: 6px;
+}
+
+.input-wrapper {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--apple-subtext);
+    pointer-events: none;
+}
+
+input[type="url"] {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 8px 12px 8px 32px;
+    color: #ffffff;
+    font-size: 12px;
+    outline: none;
+    transition: border 0.2s, background 0.2s;
+}
+
+input[type="url"]:focus {
+    border-color: var(--apple-accent);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.add-btn {
+    background: var(--apple-accent);
+    color: #ffffff;
+    border: 0;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 0 14px var(--apple-accent-glow);
+}
+
+.add-btn:hover {
+    background: #ff3b56;
+}
+
+.status-msg {
+    min-height: 14px;
+    font-size: 10px;
+    color: var(--apple-subtext);
+    margin-top: 4px;
+}
+
+.queue-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.queue-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.queue-header h3 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.clear-btn {
+    background: transparent;
+    border: 0;
+    color: var(--apple-subtext);
+    font-size: 11px;
+    cursor: pointer;
+    transition: color 0.2s;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.clear-btn:hover {
+    color: var(--apple-accent);
+}
+
+.queue-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-right: 2px;
+}
+
+.queue-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.queue-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.queue-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: background 0.2s, border 0.2s;
+    min-width: 0;
+}
+
+.queue-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.queue-item.active {
+    background: rgba(250, 45, 72, 0.12);
+    border: 1px solid rgba(250, 45, 72, 0.25);
+    box-shadow: inset 0 0 10px rgba(250, 45, 72, 0.05);
+}
+
+.queue-index {
+    font-size: 11px;
+    font-weight: 700;
+    width: 16px;
+    min-width: 16px;
+    text-align: center;
+    color: var(--apple-subtext);
+    flex-shrink: 0;
+}
+
+.queue-item.active .queue-index {
+    color: var(--apple-accent);
+}
+
+.queue-thumb {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #2b2e38, #14161d);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--apple-subtext);
+    flex-shrink: 0;
+}
+
+.queue-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.queue-title-text {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+}
+
+.queue-sub-text {
+    font-size: 10px;
+    color: var(--apple-subtext);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.remove-btn {
+    border: 0;
+    background: transparent;
+    color: var(--apple-subtext);
+    font-size: 15px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+    min-width: 20px;
+}
+
+.remove-btn:hover {
+    color: #ff453a;
+    background: rgba(255, 69, 58, 0.15);
+}
+
+/* RADIO GRID VIEW */
+.radio-grid-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.radio-header {
+    margin-bottom: 12px;
+}
+
+.radio-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.radio-subtitle {
+    font-size: 11px;
+    color: var(--apple-subtext);
+}
+
+.radio-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding-right: 4px;
+}
+
+.radio-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.radio-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.radio-card-item {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.2s, border 0.2s;
+}
+
+.radio-card-item:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.radio-card-item.active {
+    background: rgba(250, 45, 72, 0.16);
+    border-color: rgba(250, 45, 72, 0.45);
+}
+
+.radio-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.radio-name-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* PHONE VIEW */
+.phone-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.phone-card {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 400px;
+}
+
+.phone-icon-big {
+    font-size: 45px;
+    margin-bottom: 10px;
+}
+
+.phone-card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.phone-card p {
+    font-size: 12px;
+    color: var(--apple-subtext);
+    margin-bottom: 16px;
+}
+
+.phone-badges {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: rgba(250, 45, 72, 0.15);
+    border: 1px solid rgba(250, 45, 72, 0.3);
+    color: var(--apple-accent);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+#youtubePlayer {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* ==========================================================================
+   TRACK CHANGE ANIMATION & GLOW EFFECTS
+   ========================================================================== */
+
+.cover-art, .hud-cover {
+    transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.25s ease, box-shadow 0.35s ease !important;
+}
+
+.track-title, .track-subtitle, .hud-title, .hud-subtitle {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease !important;
+}
+
+.track-changing {
+    opacity: 0.15 !important;
+    transform: translateY(10px) scale(0.92) !important;
+}
+
+.cover-art.track-bump {
+    transform: scale(1.08) !important;
+    box-shadow: 0 0 35px var(--apple-accent-glow), 0 12px 32px rgba(0, 0, 0, 0.65) !important;
+}
+
+.hud-cover.track-bump {
+    transform: scale(1.12) !important;
+    box-shadow: 0 0 20px var(--apple-accent-glow) !important;
+}
+
+.hud-widget.hud-pulse {
+    animation: hudGlowPulse 0.85s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes hudGlowPulse {
+    0% {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    40% {
+        box-shadow: 0 0 40px var(--apple-accent-glow), 0 15px 35px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(250, 45, 72, 0.3);
+        border-color: rgba(250, 45, 72, 0.8);
+        transform: translateY(-2px) scale(1.02);
+    }
+    100% {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(0) scale(1);
+    }
+}

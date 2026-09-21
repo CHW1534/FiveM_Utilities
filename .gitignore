@@ -1,0 +1,11 @@
+# Third-party resources in this directory
+oxmysql/
+pma-voice/
+sky_phone/
+vMenu/
+la_costa_update/
+.gitkeep
+
+# Windows / OS files
+Thumbs.db
+desktop.ini
