@@ -57,6 +57,16 @@ Colección de utilidades ligeras, de alto rendimiento y listas para usar en serv
   * **Eliminación de Nivel de Búsqueda:** Opción para retirar estrellas de policía.
   * **Blips en el Minimapa:** Marcadores en el radar con códigos de color para identificar guardaespaldas y vehículos de escolta.
 
+<p align="center">
+  <img src="assets/bodyguard_main.png" alt="Menú Principal de BodyGuard" width="31%" />
+  <img src="assets/bodyguard_tiers.png" alt="Tiers y Guardaespaldas Custom" width="31%" />
+  <img src="assets/bodyguard_escort.png" alt="Vehículos de Escolta Blindados" width="31%" />
+</p>
+<p align="center">
+  <img src="assets/bodyguard_services.png" alt="Servicios Tácticos y Auto-Limpieza" width="46%" />
+  <img src="assets/bodyguard_admin.png" alt="Panel de Administración en Vivo" width="46%" />
+</p>
+
 * **Controles y Comandos:**
   * `B` (tecla por defecto) o `/bodyguard` - Abrir el menú interactivo.
   * `/dismiss` - Despedir a todos los guardaespaldas y retirar vehículos de escolta.

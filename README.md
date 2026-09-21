@@ -59,6 +59,16 @@ A collection of lightweight, high-performance, and plug-and-play utilities for *
   * **Anti-Lag Auto-Cleanup:** Automatically deletes abandoned vehicles (+1000m radius after 5 min) and laggy/stray bodyguards (+120m distance after 5 min) to prevent entity pool saturation.
   * **Admin Panel (`/bgadmin`):** Live in-game permission management by Discord ID, FiveM ID, License, or Steam.
   * **Minimap Blips:** Custom real-time radar blips for active bodyguards and convoys.
+<p align="center">
+  <img src="assets/bodyguard_main.png" alt="BodyGuard Main Menu" width="31%" />
+  <img src="assets/bodyguard_tiers.png" alt="BodyGuard Tiers & Custom Peds" width="31%" />
+  <img src="assets/bodyguard_escort.png" alt="Armored Escort Vehicles" width="31%" />
+</p>
+<p align="center">
+  <img src="assets/bodyguard_services.png" alt="BodyGuard Tactical Services & Cleanup" width="46%" />
+  <img src="assets/bodyguard_admin.png" alt="Live Admin Permissions Panel" width="46%" />
+</p>
+
 * **Controls & Commands:**
   * `B` (Keyboard default) or `/bodyguard` - Open recruitment menu.
   * `/dismiss` - Dismiss all hired bodyguards and escort vehicles.
@@ -174,6 +184,16 @@ Colección de utilidades ligeras, ultra optimizadas y listas para usar en servid
   * **Auto-Limpieza Anti-Lag:** Borra automáticamente vehículos abandonados (+1000m tras 5 min) y guardaespaldas rezagados (+120m tras 5 min) para evitar saturación de la pool de entidades y caídas de FPS.
   * **Panel de Administración (`/bgadmin`):** Gestión de permisos en vivo por License, Discord, Steam o FiveM ID.
   * **Blips en el Radar:** Marcadores personalizados en el minimapa para monitorear escoltas y vehículos en tiempo real.
+<p align="center">
+  <img src="assets/bodyguard_main.png" alt="Menú Principal de BodyGuard" width="31%" />
+  <img src="assets/bodyguard_tiers.png" alt="Tiers y Guardaespaldas Custom" width="31%" />
+  <img src="assets/bodyguard_escort.png" alt="Vehículos de Escolta Blindados" width="31%" />
+</p>
+<p align="center">
+  <img src="assets/bodyguard_services.png" alt="Servicios Tácticos y Auto-Limpieza" width="46%" />
+  <img src="assets/bodyguard_admin.png" alt="Panel de Administración en Vivo" width="46%" />
+</p>
+
 * **Controles y Comandos:**
   * Tecla `B` (por defecto) o `/bodyguard` - Abrir menú de contratación.
   * `/dismiss` - Despedir a todos los guardaespaldas y eliminar vehículos escolta.
