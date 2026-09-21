@@ -74,6 +74,14 @@ A collection of lightweight, high-performance, and plug-and-play utilities for *
   * **Driver / Passenger Synchronization:** Everyone inside the vehicle hears the music at the exact same millisecond timestamp, synchronized via server clock delta.
   * **Drive-While-Open:** Players can accelerate, steer, and brake with the UI open. Native GTA radio wheel and scroll inputs are intercepted to prevent accidental weapon switching.
   * **GTA V Radio Monitor:** Formats real radio station labels and allows seamless toggling between GTA stations and YouTube playback without audio overlap.
+<p align="center">
+  <img src="assets/carplay_player.png" alt="CarPlay Active Playback & YouTube Queue" width="49%">
+  <img src="assets/carplay_idle.png" alt="CarPlay Clean Idle Dashboard" width="49%">
+</p>
+<p align="center">
+  <img src="assets/carplay_widget.png" alt="CarPlay In-Game Mini HUD Player" width="340">
+</p>
+
 * **Controls & Commands:**
   * `F7` or `/carplay` - Toggle CarPlay on/off (must be inside a vehicle).
 
@@ -182,6 +190,14 @@ Colección de utilidades ligeras, ultra optimizadas y listas para usar en servid
   * **Sincronización Pasajero / Conductor:** Todos los pasajeros del coche escuchan la misma canción en el mismo segundo exacto, sincronizados mediante el reloj del servidor.
   * **Conducción con Menú Abierto:** Permite acelerar, frenar y maniobrar mientras el CarPlay está en pantalla. Bloquea la rueda de armas y emisoras de GTA para evitar cambios accidentales al usar el ratón.
   * **Monitor de Radio de GTA V:** Reconoce las emisoras nativas de GTA V por su nombre real y conmuta limpiamente entre radio y YouTube.
+<p align="center">
+  <img src="assets/carplay_player.png" alt="CarPlay Reproductor con Cola de YouTube" width="49%">
+  <img src="assets/carplay_idle.png" alt="CarPlay Dashboard en Reposo" width="49%">
+</p>
+<p align="center">
+  <img src="assets/carplay_widget.png" alt="Widget Mini HUD en Juego (Tecla F7)" width="340">
+</p>
+
 * **Controles y Comandos:**
   * Tecla `F7` o `/carplay` - Abrir/cerrar CarPlay (debes estar dentro de un vehículo).
 

@@ -76,6 +76,14 @@ Colección de utilidades ligeras, de alto rendimiento y listas para usar en serv
   * **Conducción con Menú Abierto:** Permite acelerar, frenar, doblar y accionar el freno de mano mientras la interfaz está abierta, bloqueando la rueda de selección de armas y la rueda de radio para evitar cambios involuntarios con el ratón.
   * **Integración con la Radio de GTA V:** Muestra el nombre real de cada emisora nativa y silencia la radio del juego automáticamente al reproducir contenido de YouTube, y viceversa.
 
+<p align="center">
+  <img src="assets/carplay_player.png" alt="CarPlay Reproductor con Cola de YouTube" width="49%">
+  <img src="assets/carplay_idle.png" alt="CarPlay Dashboard en Reposo" width="49%">
+</p>
+<p align="center">
+  <img src="assets/carplay_widget.png" alt="Widget Mini HUD en Juego (Tecla F7)" width="340">
+</p>
+
 * **Controles y Comandos:**
   * `F7` o comando `/carplay` - Abrir o cerrar la pantalla CarPlay (requiere estar dentro de un vehículo).
 
