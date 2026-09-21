@@ -110,6 +110,14 @@ Colección de utilidades ligeras, de alto rendimiento y listas para usar en serv
   * **Filtro Inteligente de Vehículos:** Excluye motos, bicicletas, botes, helicópteros, aviones y trenes.
   * **Totalmente Standalone:** A pesar de su prefijo tradicional `esx_`, no tiene dependencias y funciona en servidores Standalone, ESX, QBCore y vMenu.
 
+<p align="center">
+  <img src="assets/sticky_wheels_oem.jpg" alt="GTA V por Defecto (Ruedas se Enderezan)" width="49%">
+  <img src="assets/sticky_wheels_script.jpg" alt="Con Sticky Wheels (Ángulo de Giro Bloqueado)" width="49%">
+</p>
+<p align="center">
+  <em>Izquierda: GTA V Original (las ruedas vuelven al centro al bajarse) &nbsp;|&nbsp; Derecha: Con Sticky Wheels (ruedas fijas en su ángulo de estacionamiento)</em>
+</p>
+
 ---
 
 ## 4. 🗺️ respawn_menu (`v1.1.0`)

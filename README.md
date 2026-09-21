@@ -105,6 +105,14 @@ A collection of lightweight, high-performance, and plug-and-play utilities for *
   * **Class Filtering:** Automatically ignores bikes, motorcycles, helicopters, planes, trains, and boats.
   * **100% Framework Agnostic:** Despite the historical `esx_` prefix, it is completely standalone and works on Standalone, ESX, QBCore, and vMenu servers.
 
+<p align="center">
+  <img src="assets/sticky_wheels_oem.jpg" alt="Default GTA V Behavior (Wheels Auto-Center)" width="49%">
+  <img src="assets/sticky_wheels_script.jpg" alt="With Sticky Wheels (Angle Locked When Parked)" width="49%">
+</p>
+<p align="center">
+  <em>Left: Default GTA V (Wheels return straight) &nbsp;|&nbsp; Right: With Sticky Wheels Script (Steering angle preserved)</em>
+</p>
+
 ---
 
 ### 4. 🗺️ respawn_menu (`v1.1.0`)
@@ -231,6 +239,14 @@ Colección de utilidades ligeras, ultra optimizadas y listas para usar en servid
   * **Cero Carga en el Servidor:** Utiliza OneSync State Bags (`Entity(veh).state.ps_angle`), evitando loops pesados de sincronización.
   * **Filtro de Clases:** Excluye motos, bicicletas, botes, helicópteros, aviones y trenes.
   * **100% Standalone:** No depende de ningún framework, compatible con Standalone, ESX, QBCore y vMenu.
+
+<p align="center">
+  <img src="assets/sticky_wheels_oem.jpg" alt="GTA V por Defecto (Ruedas se Enderezan)" width="49%">
+  <img src="assets/sticky_wheels_script.jpg" alt="Con Sticky Wheels (Ángulo de Giro Bloqueado)" width="49%">
+</p>
+<p align="center">
+  <em>Izquierda: GTA V Original (las ruedas vuelven al centro al bajarse) &nbsp;|&nbsp; Derecha: Con Sticky Wheels (ruedas fijas en su ángulo de estacionamiento)</em>
+</p>
 
 ---
 
