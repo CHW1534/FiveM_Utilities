@@ -1,10 +1,10 @@
 fx_version 'cerulean'
 game 'gta5'
 
-name 'team_selector'
+name 'service_menu'
 author 'CHW'
 url 'https://github.com/CHW1534'
-description 'Sistema moderno de Selección de Equipos con NPCs, Teletransporte, Ítems y Blacklist'
+description 'Tactical Service Menu & Faction Manager with 3D Web NUI, AI Escorts, Teleportation & Inventory Blacklist'
 version '1.0.0'
 
 ui_page 'html/index.html'
@@ -14,7 +14,9 @@ files {
     'html/style.css',
     'html/script.js',
     'html/img/*.png',
-    'html/img/*.jpg'
+    'html/img/*.jpg',
+    'html/img/*.svg',
+    'html/img/items/*.png'
 }
 
 shared_script 'config.lua'

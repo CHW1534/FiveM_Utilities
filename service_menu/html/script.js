@@ -217,6 +217,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 dismissBtn.addEventListener('mouseout', () => dismissBtn.style.background = 'rgba(0,0,0,0.5)');
             }
 
+            // 3D Web Experience: Interactive 3D Perspective Tilt on Mouse Movement
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(8px)`;
+                card.style.boxShadow = `0 20px 40px ${team.colorGlow || 'rgba(0,0,0,0.6)'}`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+                card.style.boxShadow = '';
+            });
+
             teamsGrid.appendChild(card);
         });
     }

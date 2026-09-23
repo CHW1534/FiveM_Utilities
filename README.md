@@ -41,7 +41,7 @@ A collection of lightweight, high-performance, and plug-and-play utilities for *
 | **[carplay](#2-carplay)** | `1.0.0` | Standalone | Apple CarPlay in-car NUI interface with synced 3D spatial YouTube audio & radio tuner. |
 | **[esx_sticky_wheels](#3-esx_sticky_wheels)** | `6.0.0` | Standalone | OneSync State Bag parked steering wheel angle lock upon exit. |
 | **[respawn_menu](#4-respawn_menu)** | `1.1.0` | Standalone / ESX | Interactive tactical respawn map, distance exclusion zones, I-Frames & admin panel. |
-| **[team_selector](#5-team_selector)** | `1.0.0` | Standalone / ESX | Interactive lobby NPC team/faction selection with teleportation, blacklist & auto-loadout. |
+| **[service_menu](#5-service_menu)** | `1.0.0` | Standalone / ESX | Tactical service & faction manager with 3D glassmorphic NUI, AI escorts, base teleport & inventory blacklist. |
 
 ---
 
@@ -127,14 +127,18 @@ A collection of lightweight, high-performance, and plug-and-play utilities for *
 
 ---
 
-### 5. 👥 team_selector (`v1.0.0`)
-**Tactical Team & Faction Selector Hub**
-* **Purpose:** Provides a centralized, interactive lobby NPC where players select teams/factions (Police, Tactical Units, Gangs, Civilians) with automatic loadout and teleportation.
+<a name="5-service_menu"></a>
+### 5. 🎖️ service_menu (`v1.0.0`)
+**Tactical Service Menu & Faction Manager with 3D Glassmorphic Web NUI**
+* **Purpose:** High-performance faction selection and tactical service management hub featuring interactive 3D Web UI, AI escort hiring, base teleportation, and automated gear blacklist cleaning.
 * **Key Features:**
-  * **Interactive Lobby NPC:** World ped with animation, interaction distance check, and custom radar blip.
-  * **Blacklist Inventory Cleaner:** Automatically strips illegal or opposing weapons and items when switching jobs/teams.
-  * **Automatic Loadout & Armor:** Grants weapons, ammunition, medkits, and body armor on spawn.
-  * **Instant Teleportation:** Teleports players straight to their designated headquarters or faction outpost.
+  * **3D Glassmorphic Web NUI:** Dynamic card perspective tilt effects, dynamic faction colors, interactive weapon item grids, and 60 FPS CSS backdrop blur transitions.
+  * **Faction & Team Selector:** Configurable jobs/teams (Police, Tactical Units, Cartels, Army, Civilian) with auto-assigned loadouts and body armor.
+  * **Blacklist Inventory Cleaner:** Automatically strips illegal or opposing faction gear upon team change or returning to Civilian status.
+  * **Base Teleportation System:** Prompts players to deploy directly to faction headquarters or stay at their current location.
+  * **AI Escort & Bodyguards Integration:** Hire tactical AI escorts and bodyguards on duty for fire support.
+  * **Lobby NPC & Radar Blips:** Interactive lobby ped with floating 3D text and custom radar blips.
+* **Documentation:** Complete manual available in [service_menu/README.md](service_menu/README.md) (Spanish: [service_menu/README.es.md](service_menu/README.es.md)).
 
 ---
 
@@ -151,7 +155,7 @@ A collection of lightweight, high-performance, and plug-and-play utilities for *
    ensure carplay
    ensure esx_sticky_wheels
    ensure respawn_menu
-   ensure team_selector
+   ensure service_menu
    ```
 3. Restart your server or run `refresh` and `start [resourceName]` in your server console.
 
@@ -173,7 +177,7 @@ Colección de utilidades ligeras, ultra optimizadas y listas para usar en servid
 | **[carplay](#2-carplay-es)** | `1.0.0` | Standalone | Sistema NUI estilo Apple CarPlay con YouTube sincronizado, audio 3D y sintonizador de radio. |
 | **[esx_sticky_wheels](#3-esx_sticky_wheels-es)** | `6.0.0` | Standalone | Mantiene las ruedas giradas al estacionar y bajarse del vehículo con OneSync State Bags. |
 | **[respawn_menu](#4-respawn_menu-es)** | `1.1.0` | Standalone / ESX | Menú de reaparición táctico con mapa satelital interactivo, zonas de exclusión, I-Frames y panel admin. |
-| **[team_selector](#5-team_selector-es)** | `1.0.0` | Standalone / ESX | Selección de equipos con NPC interactivo en lobby, teletransporte, blacklist de ítems y equipamiento. |
+| **[service_menu](#5-service_menu-es)** | `1.0.0` | Standalone / ESX | Menú táctico de facciones y servicios con NUI 3D glassmorphic, escoltas IA, teletransporte y blacklist de ítems. |
 
 ---
 
@@ -263,15 +267,18 @@ Colección de utilidades ligeras, ultra optimizadas y listas para usar en servid
 
 ---
 
-<a name="5-team_selector-es"></a>
-### 5. 👥 team_selector (`v1.0.0`)
-**Lobby Táctico con Selección de Equipos por NPC**
-* **Propósito:** Punto centralizado con un NPC animado para que los jugadores elijan facción o bando con equipamiento y teletransporte automático.
+<a name="5-service_menu-es"></a>
+### 5. 🎖️ service_menu (`v1.0.0`)
+**Menú Táctico de Servicios y Facciones con Interfaz Web 3D Glassmorphism**
+* **Propósito:** Centro de selección de bando y gestión táctica de servicios con interfaz NUI 3D moderna, contratación de guardaespaldas con IA, teletransporte a base operativa y limpiador automático de blacklist de inventario.
 * **Características Principales:**
-  * **NPC en el Lobby:** Ped animado con icono en el radar y detección de proximidad.
-  * **Limpiador de Blacklist:** Retira automáticamente armas y objetos prohibidos o del equipo contrario al cambiar de bando.
-  * **Equipamiento y Chaleco Automático:** Asigna armas, munición y botiquines al confirmar la selección.
-  * **Teletransporte Inmediato:** Despliega al jugador en las coordenadas base del equipo asignado.
+  * **Interfaz Web NUI 3D Glassmorphism:** Efecto dinámico de inclinación 3D en perspectiva según el cursor del ratón, colores temáticos por facción y transiciones con desenfoque de fondo CSS a 60 FPS.
+  * **Selección de Facciones y Equipos:** Trabajos configurables (Policía, Unidades Tácticas, Carteles, Ejército, Civil) con entrega automática de equipamiento y chaleco antibalas.
+  * **Filtro Limpiador de Blacklist:** Retira automáticamente armas restringidas u objetos del bando contrario al cambiar de equipo o volver a Civil.
+  * **Teletransporte a Base Operativa:** Modal de confirmación para aparecer directamente en el cuartel general o permanecer en la posición actual.
+  * **Integración de Escoltas e IA:** Permite reclutar guardaespaldas y unidades tácticas de apoyo en combate.
+  * **NPC de Lobby y Blips en el Radar:** NPC animado con texto 3D flotante e icono en el minimapa.
+* **Documentación:** Manual completo disponible en [service_menu/README.es.md](service_menu/README.es.md) (Inglés: [service_menu/README.md](service_menu/README.md)).
 
 ---
 
@@ -288,7 +295,7 @@ Colección de utilidades ligeras, ultra optimizadas y listas para usar en servid
    ensure carplay
    ensure esx_sticky_wheels
    ensure respawn_menu
-   ensure team_selector
+   ensure service_menu
    ```
 3. Reinicia tu servidor o escribe `refresh` y `start [nombre_del_recurso]` en la consola del servidor.
 

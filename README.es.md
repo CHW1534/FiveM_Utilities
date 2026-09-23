@@ -34,7 +34,7 @@ Colección de utilidades ligeras, de alto rendimiento y listas para usar en serv
 | **[carplay](#2-carplay)** | `1.0.0` | Standalone | Sistema NUI estilo Apple CarPlay con YouTube sincronizado, audio 3D y sintonizador de radio. |
 | **[esx_sticky_wheels](#3-esx_sticky_wheels)** | `6.0.0` | Standalone | Mantiene las ruedas giradas al estacionar y bajarse del vehículo con OneSync State Bags. |
 | **[respawn_menu](#4-respawn_menu)** | `1.1.0` | Standalone / ESX | Menú de reaparición táctico con mapa satelital interactivo, zonas de exclusión, I-Frames y panel admin. |
-| **[team_selector](#5-team_selector)** | `1.0.0` | Standalone / ESX | Selección de equipos con NPC interactivo en lobby, teletransporte, blacklist de ítems y equipamiento. |
+| **[service_menu](#5-service_menu)** | `1.0.0` | Standalone / ESX | Menú táctico de facciones y servicios con NUI 3D glassmorphic, escoltas IA, teletransporte y blacklist de ítems. |
 
 ---
 
@@ -135,17 +135,20 @@ Colección de utilidades ligeras, de alto rendimiento y listas para usar en serv
 
 ---
 
-## 5. 👥 team_selector (`v1.0.0`)
-### Lobby Táctico con Selección de Equipos por NPC
+## 5. 🎖️ service_menu (`v1.0.0`)
+### Menú Táctico de Servicios y Facciones con Interfaz Web 3D Glassmorphism
 
 * **¿Para qué sirve?**  
-  Proporciona una zona de lobby con un NPC interactivo donde los jugadores eligen su facción o equipo (Fuerzas Especiales, Bandas, Civiles, etc.), asignándoles automáticamente su equipamiento, chaleco y teletransporte a su base de operaciones.
+  Proporciona un centro de selección de facción y gestión de servicios tácticos con interfaz NUI 3D moderna, contratación de guardaespaldas con IA, teletransporte a la base operativa del bando y limpiador automático de blacklist de inventario.
 
 * **Características Principales:**
-  * **NPC en Lobby:** Ped con animación idle, marcador en el radar y verificación de rango de interacción.
-  * **Limpieza de Inventario (Blacklist):** Retira automáticamente armas y consumibles de facciones contrarias al cambiar de equipo.
-  * **Asignación Automática:** Entrega armas reglamentarias, munición, chalecos blindados y kits médicos al unirse a un bando.
-  * **Teletransporte a Base:** Despliega instantáneamente al jugador en su cuartel general con coordenadas y orientación (heading) precisas.
+  * **Interfaz Web NUI 3D Glassmorphism:** Efecto interactivo de inclinación 3D en perspectiva según la posición del cursor del ratón, colores temáticos por facción y transiciones CSS con desenfoque de fondo a 60 FPS.
+  * **NPC en Lobby y Blips:** Ped animado en el lobby con texto 3D flotante e icono en el mapa.
+  * **Limpieza de Inventario (Blacklist):** Retira automáticamente armas y consumibles de facciones contrarias al cambiar de equipo o volver a Civil.
+  * **Asignación Automática de Equipamiento:** Entrega armas reglamentarias, munición, chalecos blindados y kits médicos al unirse a un bando.
+  * **Teletransporte a Base Operativa:** Modal de confirmación para aparecer directamente en el cuartel general o permanecer en la ubicación actual.
+  * **Contratación de Guardaespaldas IA:** Permite solicitar guardaespaldas tácticos en servicio para soporte en combate.
+* **Documentación:** Manual completo disponible en [service_menu/README.es.md](service_menu/README.es.md) (Inglés: [service_menu/README.md](service_menu/README.md)).
 
 ---
 
@@ -163,7 +166,7 @@ Colección de utilidades ligeras, de alto rendimiento y listas para usar en serv
    ensure carplay
    ensure esx_sticky_wheels
    ensure respawn_menu
-   ensure team_selector
+   ensure service_menu
    ```
 
 3. Reinicia el servidor o ejecuta en la consola:
@@ -173,7 +176,7 @@ Colección de utilidades ligeras, de alto rendimiento y listas para usar en serv
    start carplay
    start esx_sticky_wheels
    start respawn_menu
-   start team_selector
+   start service_menu
    ```
 
 ---
