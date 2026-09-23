@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Equipos</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="overlay"></div>
+        <div class="modal-container">
+            <button id="close-btn" class="close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <header class="header">
+                <div class="header-badge">SISTEMA DE OPERACIONES</div>
+                <h1 id="ui-title">SELECCIÓN DE EQUIPOS</h1>
+                <p id="ui-subtitle">Elige tu bando de operaciones. Serás teletransportado automáticamente a la base correspondiente.</p>
+            </header>
+
+            <main id="teams-grid" class="teams-grid">
+                <!-- Team cards rendered dynamically via JS -->
+            </main>
+
+            <!-- Teleport Confirmation Modal -->
+            <div id="teleport-modal" class="teleport-modal hidden">
+                <div class="modal-content">
+                    <h2>¿A dónde quieres ir?</h2>
+                    <p>Has seleccionado un nuevo equipo. Puedes teletransportarte a la base operativa del equipo o permanecer en tu ubicación actual.</p>
+                    <div class="modal-actions">
+                        <button id="btn-stay" class="modal-btn btn-secondary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            Permanecer Aquí
+                        </button>
+                        <button id="btn-base" class="modal-btn btn-primary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                            Ir a la Base
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bodyguard Selection Modal -->
+            <div id="bodyguard-modal" class="teleport-modal hidden">
+                <div class="modal-content">
+                    <h2 id="bg-modal-title">Reclutar Guardaespaldas</h2>
+                    <p id="bg-modal-desc">Selecciona el tipo de escolta que deseas contratar.</p>
+                    
+                    <div style="margin: 20px 0;">
+                        <select id="bg-select" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 16px; cursor: pointer;">
+                            <!-- Options rendered via JS -->
+                        </select>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button id="btn-bg-cancel" class="modal-btn btn-secondary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            Cancelar
+                        </button>
+                        <button id="btn-bg-confirm" class="modal-btn btn-primary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Desplegar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BodyGuard Menu Container -->
+    <div id="menu-container" class="hidden">
+        <!-- Banner -->
+        <div class="menu-banner">
+            <span class="banner-title" id="banner-title">SERVICE MENU</span>
+        </div>
+
+        <!-- Subtitle bar -->
+        <div class="menu-subtitle" id="menu-subtitle">MENÚ PRINCIPAL</div>
+
+        <!-- Items -->
+        <div class="menu-items" id="menu-items"></div>
+
+        <!-- Description box -->
+        <div class="menu-description" id="menu-description"></div>
+
+        <!-- Counter -->
+        <div class="menu-counter">
+            <span id="item-counter">1 / 5</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

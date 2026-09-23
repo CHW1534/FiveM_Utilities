@@ -1,3 +1,243 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const app = document.getElementById('app');
+    const teamsGrid = document.getElementById('teams-grid');
+    const closeBtn = document.getElementById('close-btn');
+
+    closeBtn.addEventListener('click', () => {
+        closeUI();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            if (!app.classList.contains('hidden')) {
+                closeUI();
+            }
+        }
+    });
+
+    window.addEventListener('message', (event) => {
+        const data = event.data;
+        if (data.action === 'openUI') {
+            if (data.bodyguardTiers) {
+                renderBodyguardTiers(data.bodyguardTiers);
+            }
+            renderTeams(data.teams, data.currentJob, data.locales, data.currentTeamId);
+            app.classList.remove('hidden');
+        } else if (data.action === 'closeUI') {
+            app.classList.add('hidden');
+        }
+    });
+
+    function renderBodyguardTiers(tiers) {
+        const bgSelect = document.getElementById('bg-select');
+        bgSelect.innerHTML = '';
+        tiers.forEach(tier => {
+            const option = document.createElement('option');
+            option.value = tier.id;
+            option.textContent = `${tier.label} - ${tier.description}`;
+            bgSelect.appendChild(option);
+        });
+    }
+
+    function closeUI() {
+        app.classList.add('hidden');
+        fetch(`https://${GetParentResourceName()}/closeUI`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+    }
+
+    let pendingTeamId = null;
+    const teleportModal = document.getElementById('teleport-modal');
+    const btnStay = document.getElementById('btn-stay');
+    const btnBase = document.getElementById('btn-base');
+
+    btnStay.addEventListener('click', () => {
+        if (pendingTeamId) {
+            selectTeam(pendingTeamId, false);
+            teleportModal.classList.add('hidden');
+        }
+    });
+
+    btnBase.addEventListener('click', () => {
+        if (pendingTeamId) {
+            selectTeam(pendingTeamId, true);
+            teleportModal.classList.add('hidden');
+        }
+    });
+
+    const bodyguardModal = document.getElementById('bodyguard-modal');
+    const btnBgCancel = document.getElementById('btn-bg-cancel');
+    const btnBgConfirm = document.getElementById('btn-bg-confirm');
+
+    btnBgCancel.addEventListener('click', () => {
+        bodyguardModal.classList.add('hidden');
+    });
+
+    btnBgConfirm.addEventListener('click', () => {
+        const bgSelect = document.getElementById('bg-select');
+        if (bgSelect && bgSelect.value) {
+            fetch(`https://${GetParentResourceName()}/spawnBodyguard`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tier: bgSelect.value })
+            });
+            bodyguardModal.classList.add('hidden');
+            closeUI();
+        }
+    });
+
+    function renderTeams(teams, currentJob, locales, currentTeamId) {
+        teamsGrid.innerHTML = '';
+
+        teams.forEach(team => {
+            const isCurrent = (currentTeamId ? (team.id === currentTeamId) : (currentJob === team.job || currentJob === team.id));
+            const card = document.createElement('div');
+            card.className = 'team-card';
+            card.style.setProperty('--team-color', team.color || '#3b82f6');
+            card.style.setProperty('--team-glow', team.colorGlow || 'rgba(59, 130, 246, 0.4)');
+
+            let itemsHtml = '';
+            if (team.items && team.items.length > 0) {
+                itemsHtml = `
+                    <div class="items-section">
+                        <span class="items-title">Equipamiento Asignado:</span>
+                        <div class="items-list">
+                            ${team.items.map(i => `<span class="item-badge">${formatItemName(i.name)} x${i.count || 1}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                itemsHtml = `
+                    <div class="items-section">
+                        <span class="items-title">Equipamiento Asignado:</span>
+                        <div class="items-list">
+                            <span class="item-badge">Sin objetos tácticos</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Create image grid
+            let weapons = team.items.filter(i => i.type === 'weapon');
+            let items = team.items.filter(i => i.type === 'item');
+            
+            // Render specific grid layout as shown in the picture
+            let itemsGridHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px;">';
+            
+            if (team.items && team.items.length > 0) {
+                team.items.forEach(i => {
+                    let itemName = i.name.replace('WEAPON_', '').toLowerCase();
+                    itemsGridHtml += `
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+                            <img src="img/items/${itemName}.png" onerror="this.style.display='none'" alt="${itemName}" style="max-width: 40px; max-height: 25px; object-fit: contain;">
+                            <span style="font-size: 10px; color: #9ca3af;">${itemName} x${i.count || 1}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                itemsGridHtml += `
+                    <div style="grid-column: span 2; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px; text-align: center; color: #9ca3af; font-size: 11px;">
+                        🚫 Sin objetos tácticos
+                    </div>
+                `;
+            }
+            itemsGridHtml += '</div>';
+
+            let actionsHtml = '';
+            if (isCurrent && team.id !== 'civil') {
+                actionsHtml = `
+                    <button class="select-btn active" style="margin-bottom: 8px; cursor: default;">${locales.currentTeam || 'EQUIPO ACTUAL'}</button>
+                    <button class="bg-btn btn-primary" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 700; margin-bottom: 8px; cursor: pointer; border: none; background: ${team.color}; color: white; transition: 0.3s;">
+                        👮 RECLUTAR GUARDAESPALDAS
+                    </button>
+                    <button class="bg-dismiss-btn btn-secondary" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; transition: 0.3s;">
+                        ❌ RETIRAR SERVICIOS
+                    </button>
+                `;
+            } else {
+                actionsHtml = `
+                    <button class="select-btn ${isCurrent ? 'active' : ''}" data-id="${team.id}">
+                        ${isCurrent ? (locales.currentTeam || 'EQUIPO ACTUAL') : (locales.btnSelect || 'UNIRSE AL EQUIPO')}
+                    </button>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="card-badge">${team.badge || 'EQUIPO'}</div>
+                <div style="display:flex; justify-content:center; align-items:center; margin: 15px 0;">
+                    <img src="${team.image}" onerror="this.style.display='none'" alt="${team.name}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid ${team.color || '#fff'}; box-shadow: 0 0 15px ${team.colorGlow || 'rgba(255,255,255,0.4)'};">
+                </div>
+                <div class="card-info">
+                    <h2>${team.name}</h2>
+                    <p>${team.description}</p>
+                </div>
+                <div class="items-section">
+                    <span class="items-title">EQUIPAMIENTO ASIGNADO:</span>
+                    ${itemsGridHtml}
+                </div>
+                ${actionsHtml}
+            `;
+
+            const btn = card.querySelector('.select-btn');
+            if (btn && !isCurrent) {
+                btn.addEventListener('click', () => {
+                    if (team.id === 'civil') {
+                        selectTeam('civil', true);
+                    } else {
+                        pendingTeamId = team.id;
+                        teleportModal.classList.remove('hidden');
+                    }
+                });
+            }
+
+            const bgBtn = card.querySelector('.bg-btn');
+            if (bgBtn) {
+                bgBtn.addEventListener('click', () => {
+                    bodyguardModal.classList.remove('hidden');
+                });
+                
+                // Add hover effect programmatically to avoid complex css classes
+                bgBtn.addEventListener('mouseover', () => bgBtn.style.opacity = '0.8');
+                bgBtn.addEventListener('mouseout', () => bgBtn.style.opacity = '1');
+            }
+
+            const dismissBtn = card.querySelector('.bg-dismiss-btn');
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    fetch(`https://${GetParentResourceName()}/dismissBodyguards`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                    closeUI();
+                });
+                dismissBtn.addEventListener('mouseover', () => dismissBtn.style.background = 'rgba(255,255,255,0.1)');
+                dismissBtn.addEventListener('mouseout', () => dismissBtn.style.background = 'rgba(0,0,0,0.5)');
+            }
+
+            teamsGrid.appendChild(card);
+        });
+    }
+
+    function formatItemName(name) {
+        if (!name) return '';
+        if (name.startsWith('WEAPON_')) {
+            return '🔫 ' + name.replace('WEAPON_', '').toLowerCase();
+        }
+        return '📦 ' + name;
+    }
+
+    function selectTeam(teamId, teleport) {
+        fetch(`https://${GetParentResourceName()}/selectTeam`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ teamId: teamId, teleport: teleport })
+        });
+    }
+});
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    BodyGuard Menu — vMenu / NativeUI Style JavaScript
    Hierarchical menu navigation with keyboard support + Admin Panel
@@ -71,7 +311,7 @@ function hideMenu() {
 }
 
 function closeMenu() {
-    fetch('https://BodyGuard/closeMenu', {
+    fetch(`https://${GetParentResourceName()}/closeMenu`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -174,6 +414,9 @@ function renderCurrentView() {
             break;
         case 'services':
             renderServicesMenu();
+            break;
+        case 'events':
+            renderEventsMenu();
             break;
         case 'adminMain':
             renderAdminMain();
@@ -332,6 +575,12 @@ function renderServicesMenu() {
             action: () => cleanupNPCs()
         },
         {
+            label: 'Eventos de Carreras',
+            badge: 'MAPAS',
+            description: 'Teletransporte a circuitos de carreras especiales.',
+            submenu: 'events'
+        },
+        {
             label: 'Desactivar Tráfico y NPCs (Mundo)',
             badge: 'MUNDO',
             description: 'Alternar la aparición de tráfico, peatones y NPCs en toda la ciudad.',
@@ -346,6 +595,33 @@ function renderServicesMenu() {
     ];
 
     renderItems();
+}
+
+// ─── Events Menu ──
+function renderEventsMenu() {
+    setSubtitle('EVENTOS DE CARRERAS');
+    currentItems = [];
+
+    if (!menuData || !menuData.mapEvents) return;
+
+    menuData.mapEvents.forEach(evt => {
+        currentItems.push({
+            label: evt.label,
+            badge: evt.badge,
+            description: evt.description,
+            action: () => triggerMapEvent(evt.id)
+        });
+    });
+
+    renderItems();
+}
+
+function triggerMapEvent(eventId) {
+    fetch(`https://${GetParentResourceName()}/selectMapEvent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: eventId })
+    });
 }
 
 // ─── Admin Main Menu ──
@@ -530,7 +806,7 @@ function updateDescription() {
 // Actions → NUI Callbacks
 // ─────────────────────────────────────────────────────────────────────────────
 function buyGuard(id) {
-    fetch('https://BodyGuard/buyGuard', {
+    fetch(`https://${GetParentResourceName()}/buyGuard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id })
@@ -538,7 +814,7 @@ function buyGuard(id) {
 }
 
 function buyVehicle(id) {
-    fetch('https://BodyGuard/buyVehicle', {
+    fetch(`https://${GetParentResourceName()}/buyVehicle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id })
@@ -546,7 +822,7 @@ function buyVehicle(id) {
 }
 
 function removeWanted() {
-    fetch('https://BodyGuard/removeWanted', {
+    fetch(`https://${GetParentResourceName()}/removeWanted`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -554,7 +830,7 @@ function removeWanted() {
 }
 
 function dismissAll() {
-    fetch('https://BodyGuard/dismissAll', {
+    fetch(`https://${GetParentResourceName()}/dismissAll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -562,7 +838,7 @@ function dismissAll() {
 }
 
 function cleanupVehicles() {
-    fetch('https://BodyGuard/cleanupVehicles', {
+    fetch(`https://${GetParentResourceName()}/cleanupVehicles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -570,7 +846,7 @@ function cleanupVehicles() {
 }
 
 function cleanupNPCs() {
-    fetch('https://BodyGuard/cleanupNPCs', {
+    fetch(`https://${GetParentResourceName()}/cleanupNPCs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -578,7 +854,7 @@ function cleanupNPCs() {
 }
 
 function toggleWorldNPCs() {
-    fetch('https://BodyGuard/toggleWorldNPCs', {
+    fetch(`https://${GetParentResourceName()}/toggleWorldNPCs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -586,7 +862,7 @@ function toggleWorldNPCs() {
 }
 
 function openAdminPanel() {
-    fetch('https://BodyGuard/openAdminPanel', {
+    fetch(`https://${GetParentResourceName()}/openAdminPanel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -594,7 +870,7 @@ function openAdminPanel() {
 }
 
 function refreshPlayers() {
-    fetch('https://BodyGuard/refreshPlayers', {
+    fetch(`https://${GetParentResourceName()}/refreshPlayers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -602,7 +878,7 @@ function refreshPlayers() {
 }
 
 function setPermission(targetId, permType) {
-    fetch('https://BodyGuard/setPermission', {
+    fetch(`https://${GetParentResourceName()}/setPermission`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetId: targetId, permType: permType, tiers: null })
@@ -612,7 +888,7 @@ function setPermission(targetId, permType) {
 }
 
 function triggerCustomInput(type) {
-    fetch('https://BodyGuard/triggerCustomInput', {
+    fetch(`https://${GetParentResourceName()}/triggerCustomInput`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: type })
@@ -628,3 +904,5 @@ function escapeHtml(str) {
     div.textContent = str;
     return div.innerHTML;
 }
+
+

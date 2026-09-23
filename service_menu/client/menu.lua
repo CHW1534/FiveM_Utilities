@@ -65,15 +65,19 @@ local function buildMenuData()
         maxGuards    = max,
         activeGuards = active,
         isAdmin      = isAdmin,
+        mapEvents    = Config.MapEvents or {},
     }
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Open / Close
 -- ─────────────────────────────────────────────────────────────────────────────
+local lastToggle = 0
+
 function OpenMenu()
-    if menuOpen then return end
+    if menuOpen or (GetGameTimer() - lastToggle < 300) then return end
     menuOpen = true
+    lastToggle = GetGameTimer()
 
     local data    = buildMenuData()
     data.action   = 'openMenu'
@@ -83,8 +87,10 @@ function OpenMenu()
 end
 
 function CloseMenu()
-    if not menuOpen then return end
+    if not menuOpen or (GetGameTimer() - lastToggle < 300) then return end
     menuOpen = false
+    lastToggle = GetGameTimer()
+    
     SendNUIMessage({ action = 'closeMenu' })
     SetNuiFocus(false, false)
 end
@@ -99,6 +105,57 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Server Callbacks
 -- ─────────────────────────────────────────────────────────────────────────────
+
+RegisterNUICallback('selectMapEvent', function(data, cb)
+    local eventId = data.id
+    print("NUI Callback selectMapEvent triggered for: " .. tostring(eventId))
+    
+    if Config.MapEvents then
+        for _, evt in ipairs(Config.MapEvents) do
+            if evt.id == eventId then
+                -- Cerramos el menú primero para asegurar que no se trabe
+                CloseMenu()
+                
+                local coords = evt.coords
+                print("Teleporting to: " .. tostring(coords))
+                
+                -- Teleport
+                local ped = PlayerPedId()
+                SetEntityCoordsNoOffset(ped, coords.x, coords.y, coords.z, false, false, false)
+                
+                TriggerEvent('chat:addMessage', {
+                    color = {255, 255, 255},
+                    multiline = true,
+                    args = {"Sistema", "^2Te has teletransportado a: " .. evt.label}
+                })
+                break
+            end
+        end
+    else
+        print("Error: Config.MapEvents is nil")
+    end
+    cb('ok')
+end)
+
+-- Crear Blips en el mapa principal para los eventos
+Citizen.CreateThread(function()
+    if Config.MapEvents then
+        for _, evt in ipairs(Config.MapEvents) do
+            if evt.badge == 'ONLINE' then
+                local blip = AddBlipForCoord(evt.coords.x, evt.coords.y, evt.coords.z)
+                SetBlipSprite(blip, 315) -- Icono de coche/carrera
+                SetBlipDisplay(blip, 4)
+                SetBlipScale(blip, 0.8)
+                SetBlipColour(blip, 3) -- Azul
+                SetBlipAsShortRange(blip, true)
+                
+                BeginTextCommandSetBlipName("STRING")
+                AddTextComponentString("Circuito: " .. evt.label)
+                EndTextCommandSetBlipName(blip)
+            end
+        end
+    end
+end)
 
 -- Resultado de check admin
 RegisterNetEvent('bodyguard:client:adminResult', function(result)
@@ -289,32 +346,34 @@ RegisterNUICallback('triggerCustomInput', function(data, cb)
     cb('ok')
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Input: Tecla B + comandos
+-- Input: Comando y Tecla
 -- ─────────────────────────────────────────────────────────────────────────────
 CreateThread(function()
     while true do
         Wait(0)
-        if IsControlJustPressed(0, Config.MenuKey) then
+        if IsControlJustPressed(0, Config.MenuKey or 29) then
             if menuOpen then
                 CloseMenu()
             else
                 OpenMenu()
             end
+            Wait(250) -- Debounce
         end
     end
 end)
 
-RegisterCommand(Config.MenuCommand, function()
+RegisterCommand('servicemenu', function()
     if menuOpen then CloseMenu() else OpenMenu() end
 end, false)
+
+
 
 RegisterCommand(Config.AdminCommand, function()
     if menuOpen then CloseMenu() else OpenAdminPanel() end
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/' .. Config.DismissCommand, 'Despedir a todos los guardaespaldas y vehículos')
-TriggerEvent('chat:addSuggestion', '/' .. Config.MenuCommand, 'Abrir el menú de guardaespaldas')
+TriggerEvent('chat:addSuggestion', '/servicemenu', 'Abrir el Service Menu')
 TriggerEvent('chat:addSuggestion', '/' .. Config.AdminCommand, 'Panel de administración de BodyGuard (solo admins)')
 
 -- Check admin status on resource start

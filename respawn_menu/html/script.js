@@ -94,6 +94,9 @@ function distanceTo(ax, ay, bx, by) {
 
 // ── OPEN MENU ──────────────────────────────────────────────────────
 function openMenu(data) {
+    // Stop any leftover countdown from a previous session
+    stopCountdown();
+
     Object.assign(state, {
         deathX:    data.deathX,
         deathY:    data.deathY,
@@ -111,15 +114,27 @@ function openMenu(data) {
     if (els.minDistLabel()) els.minDistLabel().textContent = Math.round(state.minDist);
     if (els.minDistText())  els.minDistText().textContent  = Math.round(state.minDist);
 
-    // Show container
-    els.container().classList.remove('hidden');
+    const container = els.container();
 
-    // Build map & list
+    // Step 1: Make the container layoutable but invisible
+    container.classList.remove('hidden');
+    container.classList.remove('visible');
+
+    // Build map & list (needs layout to calculate positions)
     renderMap();
     renderZoneList();
 
     // VIP button state
     updateVIPButton();
+
+    // Step 2: After the browser has painted the invisible state,
+    //         add .visible to trigger the CSS opacity/scale transition.
+    //         Double-rAF ensures the transition actually plays in CEF.
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            container.classList.add('visible');
+        });
+    });
 
     // Countdown
     if (state.autoTime > 0) {
@@ -134,7 +149,9 @@ function openMenu(data) {
 
 // ── CLOSE MENU ─────────────────────────────────────────────────────
 function closeMenu() {
-    els.container().classList.add('hidden');
+    const container = els.container();
+    container.classList.remove('visible');
+    container.classList.add('hidden');
     stopCountdown();
     state.selectedId = null;
 }

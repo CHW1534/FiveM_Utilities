@@ -134,8 +134,10 @@ function SpawnBodyguard(guardConfig)
     SetPedSeeingRange(ped, 100.0)
 
     -- Relaciones con el jugador y otros
-    SetPedRelationshipGroupHash(ped, GetHashKey('PLAYER'))
-    SetCanAttackFriendly(ped, true, true)
+    local playerGroupHash = GetPedRelationshipGroupHash(PlayerPedId())
+    SetPedRelationshipGroupHash(ped, playerGroupHash)
+    SetCanAttackFriendly(ped, false, false) -- Disable friendly fire for bodyguards
+    SetEntityCanBeDamagedByRelationshipGroup(ped, false, playerGroupHash) -- No tomar daño del jugador ni de la facción
     SetPedCanBeTargetted(ped, true)
     SetPedCanBeTargettedByPlayer(ped, PlayerId(), false)
 
@@ -232,8 +234,9 @@ function SpawnEscortVehicle(vehConfig)
     SetPedCombatAttributes(driver, 46, true)
     SetPedCombatAttributes(driver, 2, true)
 
-    SetPedRelationshipGroupHash(driver, GetHashKey('PLAYER'))
-    SetCanAttackFriendly(driver, true, true)
+    local playerGroupHash = GetPedRelationshipGroupHash(PlayerPedId())
+    SetPedRelationshipGroupHash(driver, playerGroupHash)
+    SetCanAttackFriendly(driver, false, false)
     SetPedAsGroupMember(driver, ensurePlayerGroup())
     SetPedNeverLeavesGroup(driver, true)
 
@@ -757,11 +760,37 @@ CreateThread(function()
         Wait(200)
         local ped = PlayerPedId()
 
-        -- Sincronizar arma en mano
-        if IsPedArmed(ped, 7) then
-            for _, g in ipairs(spawnedGuards) do
-                if DoesEntityExist(g.ped) and not IsEntityDead(g.ped) and GetSelectedPedWeapon(g.ped) ~= g.weapon then
+        -- Sincronizar arma en mano, grupo y prevenir fuego amigo hacia el jugador
+        local playerGroupHash = GetPedRelationshipGroupHash(ped)
+        
+        for _, g in ipairs(spawnedGuards) do
+            if DoesEntityExist(g.ped) and not IsEntityDead(g.ped) then
+                -- Sincronizar grupo si el jugador cambia de facción
+                if GetPedRelationshipGroupHash(g.ped) ~= playerGroupHash then
+                    SetPedRelationshipGroupHash(g.ped, playerGroupHash)
+                end
+
+                -- Sincronizar arma
+                if IsPedArmed(ped, 7) and GetSelectedPedWeapon(g.ped) ~= g.weapon then
                     SetCurrentPedWeapon(g.ped, g.weapon, true)
+                end
+
+                -- Forzar ignorar al jugador (por si se les apunta y se vuelven hostiles)
+                local currentTarget = GetPedTargetFromCombatPed(g.ped)
+                if currentTarget == ped then
+                    ClearPedTasks(g.ped)
+                end
+            end
+        end
+
+        for _, v in ipairs(spawnedVehicles) do
+            if DoesEntityExist(v.driver) and not IsEntityDead(v.driver) then
+                if GetPedRelationshipGroupHash(v.driver) ~= playerGroupHash then
+                    SetPedRelationshipGroupHash(v.driver, playerGroupHash)
+                end
+                
+                if GetPedTargetFromCombatPed(v.driver) == ped then
+                    ClearPedTasks(v.driver)
                 end
             end
         end
@@ -795,8 +824,8 @@ CreateThread(function()
 
         -- 3. Si estás en combate cuerpo a cuerpo
         if target == 0 then
-            local combatTarget = GetPedTargetFromCombatPed(ped)
-            if combatTarget ~= 0 and IsEntityAPed(combatTarget) then
+            local hasTarget, combatTarget = GetMeleeTargetForPed(ped)
+            if hasTarget and combatTarget ~= 0 and IsEntityAPed(combatTarget) then
                 target = combatTarget
             end
         end
@@ -929,7 +958,6 @@ RegisterCommand(Config.DismissCommand, function()
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/' .. Config.DismissCommand, 'Despedir a todos los guardaespaldas y vehículos')
-TriggerEvent('chat:addSuggestion', '/' .. Config.MenuCommand, 'Abrir el menú de guardaespaldas')
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Toggle World NPCs (Traffic, Peds, Cars)
@@ -979,7 +1007,7 @@ AddEventHandler('playerSpawned', function()
         TriggerEvent('chat:addMessage', {
             color = {255, 255, 0},
             multiline = true,
-            args = {"SISTEMA", "¡Bienvenido! Usa ^2/bg^0 o la tecla correspondiente para abrir el menú de Guardaespaldas. En la sección ^3Servicios^0 podrás abrir la ^2Selección de Equipos^0 para elegir tu facción (Pocha, Yoma, GN) desde cualquier lugar."}
+            args = {"SISTEMA", "¡Bienvenido! Usa la tecla ^2B^0 o ^2/servicemenu^0 para abrir el ^3Service Menu^0. Desde ahí podrás elegir tu facción (Pocha, Yoma, GN) y reclutar guardaespaldas desde cualquier lugar."}
         })
     end
 end)

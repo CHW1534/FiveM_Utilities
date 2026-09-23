@@ -11,6 +11,7 @@
 local ESX      = nil
 local isDead   = false
 local menuOpen = false
+local isRespawning = false  -- Guard: prevents polling thread interference during respawn
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- ESX Init
@@ -283,6 +284,7 @@ end
 RegisterNetEvent('respawn_menu:client:doRespawn', function(data)
     -- Cerrar menú y liberar foco NUI inmediatamente
     menuOpen = false
+    isRespawning = true  -- Block polling thread during entire respawn process
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'closeMenu' })
 
@@ -334,7 +336,10 @@ RegisterNetEvent('respawn_menu:client:doRespawn', function(data)
     SetPedCanRagdoll(ped, true)
 
     RemoveDeathEffect()
+
+    -- Marcar como vivo DESPUÉS de que el ped está resucitado
     isDead = false
+    isRespawning = false  -- Release the guard
 
     SafeFadeIn(Config.RespawnFadeTime)
     DisplayHud(true)
@@ -354,11 +359,18 @@ end)
 -- FIX #4: no se usa DisableAllControlActions que bloqueaba el cursor NUI
 -- ─────────────────────────────────────────────────────────────────────────────
 RegisterNetEvent('respawn_menu:client:openMenu', function(data)
-    if menuOpen then return end
+    if menuOpen or isRespawning then return end
     menuOpen = true
+
+    -- Reset NUI state in case it's stuck from a previous session
+    SendNUIMessage({ action = 'closeMenu' })
 
     -- Asegurar que la pantalla no se quede en negro si hubo fade por muerte previa
     DoScreenFadeIn(500)
+    local fadeDeadline = GetGameTimer() + 1500
+    while not IsScreenFadedIn() and GetGameTimer() < fadeDeadline do
+        Wait(10)
+    end
 
     -- Ocultar HUD nativo mientras el menú está abierto
     DisplayHud(false)
@@ -474,7 +486,7 @@ end)
 -- Eventos baseevents de FiveM para detección instantánea de muerte
 -- ─────────────────────────────────────────────────────────────────────────────
 AddEventHandler('baseevents:onPlayerDied', function(killerType, deathCoords)
-    if not isDead then
+    if not isDead and not isRespawning then
         isDead = true
         Wait(400)
         local coords = deathCoords or GetEntityCoords(PlayerPedId())
@@ -483,7 +495,7 @@ AddEventHandler('baseevents:onPlayerDied', function(killerType, deathCoords)
 end)
 
 AddEventHandler('baseevents:onPlayerKilled', function(killerId, deathData)
-    if not isDead then
+    if not isDead and not isRespawning then
         isDead = true
         Wait(400)
         local coords = (deathData and deathData.deathCoords) or GetEntityCoords(PlayerPedId())
@@ -497,22 +509,29 @@ end)
 CreateThread(function()
     while true do
         Wait(Config.DeathDetectInterval)
-        local ped = PlayerPedId()
 
-        -- Nueva muerte detectada
-        if not isDead and IsEntityDead(ped) then
-            isDead = true
-            Wait(400)
-            local coords = GetEntityCoords(ped)
-            TriggerServerEvent('respawn_menu:server:playerDied', coords.x, coords.y, coords.z)
-        end
+        -- Skip ALL checks while a respawn is in progress
+        if not isRespawning then
+            local ped = PlayerPedId()
 
-        -- Resurrección externa (esx_ambulancejob, hospital, etc.)
-        if isDead and not IsEntityDead(ped) and not menuOpen then
-            isDead   = false
-            menuOpen = false
-            RemoveDeathEffect()
-            SetNuiFocus(false, false)
+            -- Nueva muerte detectada
+            if not isDead and IsEntityDead(ped) then
+                isDead = true
+                Wait(400)
+                if not isRespawning then -- Re-check after wait
+                    local coords = GetEntityCoords(ped)
+                    TriggerServerEvent('respawn_menu:server:playerDied', coords.x, coords.y, coords.z)
+                end
+            end
+
+            -- Resurrección externa (esx_ambulancejob, hospital, etc.)
+            if isDead and not IsEntityDead(ped) and not menuOpen and not isRespawning then
+                isDead   = false
+                menuOpen = false
+                RemoveDeathEffect()
+                SetNuiFocus(false, false)
+                SendNUIMessage({ action = 'closeMenu' })
+            end
         end
     end
 end)
@@ -529,4 +548,5 @@ AddEventHandler('onResourceStop', function(resourceName)
     DoScreenFadeIn(0)   -- fade instantáneo si se reinicia mid-fade
     menuOpen = false
     isDead   = false
+    isRespawning = false
 end)

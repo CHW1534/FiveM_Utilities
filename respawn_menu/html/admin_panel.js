@@ -35,7 +35,17 @@ function openAdminPanel(data) {
     ap.persisted = data.persisted || [];
 
     const overlay = document.getElementById('admin-panel-overlay');
-    if (overlay) overlay.classList.remove('ap-hidden');
+    if (overlay) {
+        overlay.classList.remove('ap-hidden');
+        overlay.classList.remove('ap-visible');
+        // Double-rAF ensures the browser paints the invisible state
+        // before transitioning to visible (required for CEF in FiveM)
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                overlay.classList.add('ap-visible');
+            });
+        });
+    }
 
     renderOnlineList(ap.online);
     renderPersistedList(ap.persisted);
@@ -47,10 +57,16 @@ function openAdminPanel(data) {
 }
 
 // ── CLOSE PANEL ────────────────────────────────────────────────────
-function closeAdminPanel() {
+function closeAdminPanel(fromNUI = false) {
     const overlay = document.getElementById('admin-panel-overlay');
-    if (overlay) overlay.classList.add('ap-hidden');
-    apFetch('closeAdminPanel');
+    if (overlay) {
+        if (overlay.classList.contains('ap-hidden')) return; // Already closed
+        overlay.classList.remove('ap-visible');
+        overlay.classList.add('ap-hidden');
+    }
+    if (!fromNUI) {
+        apFetch('closeAdminPanel');
+    }
 }
 
 // ── REFRESH (without re-opening) ───────────────────────────────────
@@ -225,7 +241,7 @@ function setupCloseButton() {
     document.addEventListener('keydown', (e) => {
         const overlay = document.getElementById('admin-panel-overlay');
         if (overlay && !overlay.classList.contains('ap-hidden')) {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' || e.key === 'F6') {
                 e.preventDefault();
                 closeAdminPanel();
             }
@@ -290,7 +306,7 @@ window.addEventListener('message', (event) => {
             openAdminPanel(data);
             break;
         case 'closeAdminPanel':
-            closeAdminPanel();
+            closeAdminPanel(true);
             break;
         case 'refreshAdminPanel':
             refreshAdminPanel(data);

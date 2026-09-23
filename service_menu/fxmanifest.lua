@@ -13,15 +13,21 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
-    'html/img/*.png'
+    'html/img/*.png',
+    'html/img/*.jpg'
 }
 
 shared_script 'config.lua'
 
 client_scripts {
-    'client/main.lua'
+    'config.lua',
+    'client/main.lua',
+    'client/bodyguards.lua',
+    'client/menu.lua'
 }
 
 server_scripts {
-    'server/main.lua'
+    'config.lua',
+    'server/main.lua',
+    'server/bodyguards.lua'
 }

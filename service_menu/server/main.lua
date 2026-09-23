@@ -44,7 +44,7 @@ local function StripBlacklistItems(xPlayer, src)
 end
 
 -- Server Event: Select Team
-RegisterNetEvent('team_selector:server:selectTeam', function(teamId)
+RegisterNetEvent('team_selector:server:selectTeam', function(teamId, doTeleport)
     local src = source
     local xPlayer = nil
 
@@ -64,9 +64,7 @@ RegisterNetEvent('team_selector:server:selectTeam', function(teamId)
     if not targetTeam then return end
 
     -- 1. Strip blacklisted items from previous team
-    if xPlayer then
-        StripBlacklistItems(xPlayer, src)
-    end
+    StripBlacklistItems(xPlayer, src)
 
     -- 2. Update Job & Grade
     if xPlayer then
@@ -101,5 +99,54 @@ RegisterNetEvent('team_selector:server:selectTeam', function(teamId)
     end
 
     -- 4. Trigger client side teleport & notification
-    TriggerClientEvent('team_selector:client:teamSelected', src, targetTeam)
+    TriggerClientEvent('team_selector:client:teamSelected', src, targetTeam, doTeleport)
+end)
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Team Map Blips Sync
+-- ─────────────────────────────────────────────────────────────────────────────
+local playerTeams = {}
+
+RegisterNetEvent('team_selector:server:selectTeam')
+AddEventHandler('team_selector:server:selectTeam', function(teamId)
+    local src = source
+    if teamId == 'civil' then
+        playerTeams[src] = nil
+    else
+        playerTeams[src] = teamId
+    end
+end)
+
+AddEventHandler('playerDropped', function(reason)
+    local src = source
+    if playerTeams[src] then
+        playerTeams[src] = nil
+    end
+end)
+
+CreateThread(function()
+    while true do
+        Wait(2000) -- Update every 2 seconds
+
+        -- Gather all players in a team and their coords
+        local syncData = {}
+        local hasData = false
+
+        for src, teamId in pairs(playerTeams) do
+            local ped = GetPlayerPed(src)
+            if ped and ped ~= 0 then
+                local coords = GetEntityCoords(ped)
+                syncData[src] = {
+                    team = teamId,
+                    coords = coords
+                }
+                hasData = true
+            end
+        end
+
+        -- Only broadcast if there are people in teams
+        if hasData then
+            TriggerClientEvent('team_selector:client:syncBlips', -1, syncData)
+        end
+    end
 end)
