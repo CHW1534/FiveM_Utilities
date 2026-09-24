@@ -150,3 +150,109 @@ CreateThread(function()
         end
     end
 end)
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Faction Rivalry Counter & Scoreboard System
+-- ─────────────────────────────────────────────────────────────────────────────
+local rivalryScores = {}
+
+-- Initialize rivalry scores from Config.Teams
+local function InitRivalryScores()
+    for _, team in ipairs(Config.Teams) do
+        if team.id ~= 'civil' then
+            rivalryScores[team.id] = {
+                id = team.id,
+                name = team.name,
+                color = team.color or '#3b82f6',
+                colorGlow = team.colorGlow or 'rgba(59, 130, 246, 0.4)',
+                kills = 0
+            }
+        end
+    end
+end
+
+InitRivalryScores()
+
+local function GetRivalryScoresFormatted()
+    local list = {}
+    for _, team in ipairs(Config.Teams) do
+        if team.id ~= 'civil' and rivalryScores[team.id] then
+            table.insert(list, rivalryScores[team.id])
+        end
+    end
+    return list
+end
+
+-- Broadcast updated rivalry scores to all clients
+local function BroadcastRivalryScores()
+    TriggerClientEvent('team_selector:client:updateRivalry', -1, GetRivalryScoresFormatted())
+end
+
+-- Register Kill Event (called when a player kills an opponent)
+RegisterNetEvent('team_selector:server:registerKill', function(killerSrc, victimSrc)
+    local kSrc = killerSrc or source
+    local vSrc = victimSrc
+    local killerTeam = playerTeams[kSrc]
+    local victimTeam = playerTeams[vSrc]
+
+    if killerTeam and victimTeam and killerTeam ~= 'civil' and victimTeam ~= 'civil' and killerTeam ~= victimTeam then
+        if rivalryScores[killerTeam] then
+            rivalryScores[killerTeam].kills = rivalryScores[killerTeam].kills + 1
+            BroadcastRivalryScores()
+
+            -- Broadcast Kill Feed Notification in chat
+            local killerName = GetPlayerName(kSrc) or 'Agente'
+            local victimName = GetPlayerName(vSrc) or 'Enemigo'
+            local kTeamObj = nil
+            local vTeamObj = nil
+            for _, t in ipairs(Config.Teams) do
+                if t.id == killerTeam then kTeamObj = t end
+                if t.id == victimTeam then vTeamObj = t end
+            end
+            local kNameStr = kTeamObj and kTeamObj.name or string.upper(killerTeam)
+            local vNameStr = vTeamObj and vTeamObj.name or string.upper(victimTeam)
+            local msg = string.format("⚔️ %s (%s) eliminó a %s (%s) [+1 PTS]", killerName, kNameStr, victimName, vNameStr)
+
+            TriggerClientEvent('chat:addMessage', -1, {
+                color = { 255, 200, 0 },
+                multiline = true,
+                args = { "RIVALIDAD", msg }
+            })
+        end
+    end
+end)
+
+-- Admin command to reset rivalry scores
+RegisterCommand('resetrivalry', function(source, args, rawCommand)
+    local src = source
+    local isAdmin = false
+    if src == 0 then
+        isAdmin = true
+    else
+        local identifiers = GetPlayerIdentifiers(src)
+        for _, id in ipairs(identifiers) do
+            for _, adminId in ipairs(Config.Admins or {}) do
+                if string.lower(id) == string.lower(adminId) then
+                    isAdmin = true
+                    break
+                end
+            end
+        end
+    end
+
+    if isAdmin then
+        InitRivalryScores()
+        BroadcastRivalryScores()
+        TriggerClientEvent('chat:addMessage', -1, {
+            color = { 0, 255, 120 },
+            multiline = true,
+            args = { "RIVALIDAD", "El marcador de rivalidad de facciones ha sido reiniciado." }
+        })
+    end
+end, false)
+
+-- Broadcast initial scores on player loaded
+RegisterNetEvent('team_selector:server:syncRivalryOnJoin', function()
+    local src = source
+    TriggerClientEvent('team_selector:client:updateRivalry', src, GetRivalryScoresFormatted())
+end)

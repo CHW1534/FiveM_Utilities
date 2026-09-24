@@ -25,6 +25,38 @@ document.addEventListener('DOMContentLoaded', () => {
             app.classList.remove('hidden');
         } else if (data.action === 'closeUI') {
             app.classList.add('hidden');
+        } else if (data.action === 'updateTeamHUD') {
+            const minimapHud = document.getElementById('minimap-hud');
+            const hudBadge = document.getElementById('team-hud-badge');
+            const hudLabel = document.getElementById('team-hud-label');
+            if (data.visible === false) {
+                minimapHud.classList.add('hidden');
+            } else {
+                minimapHud.classList.remove('hidden');
+                hudLabel.textContent = data.teamName ? `EQUIPO: ${data.teamName.toUpperCase()}` : 'ESTADO: CIVIL';
+                hudBadge.style.setProperty('--hud-color', data.color || '#9ca3af');
+                hudBadge.style.setProperty('--hud-glow', data.colorGlow || 'rgba(156, 163, 175, 0.6)');
+            }
+        } else if (data.action === 'updateRivalry') {
+            const rivalryHud = document.getElementById('rivalry-counter');
+            const scoresGrid = document.getElementById('rivalry-scores-grid');
+            if (data.visible === false || !data.scores) {
+                rivalryHud.classList.add('hidden');
+            } else {
+                rivalryHud.classList.remove('hidden');
+                scoresGrid.innerHTML = '';
+                data.scores.forEach(s => {
+                    const pill = document.createElement('div');
+                    pill.className = 'rivalry-score-pill';
+                    pill.style.setProperty('--team-color', s.color || '#fff');
+                    pill.style.setProperty('--team-glow', s.colorGlow || 'rgba(255,255,255,0.4)');
+                    pill.innerHTML = `
+                        <span class="rivalry-team-name">${s.name}</span>
+                        <span class="rivalry-team-score">${s.kills || 0}</span>
+                    `;
+                    scoresGrid.appendChild(pill);
+                });
+            }
         }
     });
 

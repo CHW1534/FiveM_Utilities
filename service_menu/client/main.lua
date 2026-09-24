@@ -250,6 +250,15 @@ RegisterNetEvent('team_selector:client:teamSelected', function(teamData, doTelep
     -- Update current team state
     currentTeamId = teamData.id
 
+    -- Update Minimap Team HUD Badge
+    SendNUIMessage({
+        action = 'updateTeamHUD',
+        visible = showTeamHUD,
+        teamName = (teamData.id ~= 'civil' and teamData.name) or nil,
+        color = teamData.color or '#9ca3af',
+        colorGlow = teamData.colorGlow or 'rgba(156, 163, 175, 0.6)'
+    })
+
     -- Strip blacklisted weapons from ped
     if Config.BlacklistItems then
         for _, itemName in ipairs(Config.BlacklistItems) do
@@ -421,6 +430,92 @@ RegisterNetEvent('team_selector:client:syncBlips', function(syncData)
         if not activeBlips[srcNum] then
             if DoesBlipExist(blip) then RemoveBlip(blip) end
             teamBlips[srcNum] = nil
+        end
+    end
+end)
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Minimap Team HUD & Faction Rivalry Counter Client Logic
+-- ─────────────────────────────────────────────────────────────────────────────
+local showTeamHUD = true
+local showRivalryHUD = true
+local cachedRivalryScores = {}
+
+-- Initial sync request on player spawn
+CreateThread(function()
+    Wait(2000)
+    TriggerServerEvent('team_selector:server:syncRivalryOnJoin')
+    -- Default initial team HUD update
+    SendNUIMessage({
+        action = 'updateTeamHUD',
+        visible = showTeamHUD,
+        teamName = nil,
+        color = '#9ca3af',
+        colorGlow = 'rgba(156, 163, 175, 0.6)'
+    })
+end)
+
+-- Receive Rivalry score update from server
+RegisterNetEvent('team_selector:client:updateRivalry', function(scores)
+    cachedRivalryScores = scores or {}
+    SendNUIMessage({
+        action = 'updateRivalry',
+        visible = showRivalryHUD,
+        scores = cachedRivalryScores
+    })
+end)
+
+-- Toggle Minimap Team HUD command
+RegisterCommand('teamhud', function()
+    showTeamHUD = not showTeamHUD
+    local targetTeamObj = nil
+    for _, t in ipairs(Config.Teams) do
+        if t.id == currentTeamId then targetTeamObj = t end
+    end
+    SendNUIMessage({
+        action = 'updateTeamHUD',
+        visible = showTeamHUD,
+        teamName = (targetTeamObj and targetTeamObj.id ~= 'civil' and targetTeamObj.name) or nil,
+        color = targetTeamObj and targetTeamObj.color or '#9ca3af',
+        colorGlow = targetTeamObj and targetTeamObj.colorGlow or 'rgba(156, 163, 175, 0.6)'
+    })
+    SetNotificationTextEntry('STRING')
+    AddTextComponentString(showTeamHUD and '~g~Placa de bando en minimapa activada.' or '~r~Placa de bando en minimapa desactivada.')
+    DrawNotification(false, true)
+end, false)
+
+-- Toggle Rivalry Scoreboard HUD command
+RegisterCommand('rivalry', function()
+    showRivalryHUD = not showRivalryHUD
+    SendNUIMessage({
+        action = 'updateRivalry',
+        visible = showRivalryHUD,
+        scores = cachedRivalryScores
+    })
+    SetNotificationTextEntry('STRING')
+    AddTextComponentString(showRivalryHUD and '~g~Contador de rivalidad activado.' or '~r~Contador de rivalidad desactivado.')
+    DrawNotification(false, true)
+end, false)
+
+RegisterCommand('scores', function()
+    ExecuteCommand('rivalry')
+end, false)
+
+-- Track player kills for Faction Rivalry Counter
+AddEventHandler('gameEventTriggered', function(name, args)
+    if name == 'CEventNetworkEntityDamage' then
+        local victim = args[1]
+        local attacker = args[2]
+        local isFatal = (args[6] == 1)
+
+        -- If player is the attacker and victim is a player who died
+        if isFatal and attacker == PlayerPedId() and victim ~= PlayerPedId() and IsPedAPlayer(victim) then
+            local victimPlayerId = NetworkGetPlayerIndexFromPed(victim)
+            if victimPlayerId and victimPlayerId ~= -1 then
+                local victimServerId = GetPlayerServerId(victimPlayerId)
+                local killerServerId = GetPlayerServerId(PlayerId())
+                TriggerServerEvent('team_selector:server:registerKill', killerServerId, victimServerId)
+            end
         end
     end
 end)
